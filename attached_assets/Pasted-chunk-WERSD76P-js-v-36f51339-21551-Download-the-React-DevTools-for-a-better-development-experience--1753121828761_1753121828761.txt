@@ -1,0 +1,38 @@
+chunk-WERSD76P.js?v=36f51339:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+react_jsx-dev-runtime.js?v=36f51339:64 Warning: Each child in a list should have a unique "key" prop.
+
+Check the render method of `ClubDashboard`. See https://reactjs.org/link/warning-keys for more information.
+    at div
+    at ClubDashboard (https://9cc42ab8-cbcc-4d76-94f5-6562a0015745-00-wmk9qzrrprks.picard.replit.dev/src/pages/club-dashboard.tsx:55:18)
+    at Route (https://9cc42ab8-cbcc-4d76-94f5-6562a0015745-00-wmk9qzrrprks.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=36f51339:323:16)
+    at Switch (https://9cc42ab8-cbcc-4d76-94f5-6562a0015745-00-wmk9qzrrprks.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=36f51339:379:17)
+    at Router (https://9cc42ab8-cbcc-4d76-94f5-6562a0015745-00-wmk9qzrrprks.picard.replit.dev/src/App.tsx?v=WHiocE8ahMBieSGVoK54e:30:42)
+    at Provider (https://9cc42ab8-cbcc-4d76-94f5-6562a0015745-00-wmk9qzrrprks.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-MAE4WKEQ.js?v=36f51339:38:15)
+    at TooltipProvider (https://9cc42ab8-cbcc-4d76-94f5-6562a0015745-00-wmk9qzrrprks.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=36f51339:59:5)
+    at QueryClientProvider (https://9cc42ab8-cbcc-4d76-94f5-6562a0015745-00-wmk9qzrrprks.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=36f51339:2805:3)
+    at App
+printWarning @ react_jsx-dev-runtime.js?v=36f51339:64
+PhotoGallery.tsx:62 Upload response: <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="module">
+import RefreshRuntime from "/@react-refresh"
+RefreshRuntime.injectIntoGlobalHook(window)
+window.$RefreshReg$ = () => {}
+window.$RefreshSig$ = () => (type) => type
+window.__vite_plugin_react_preamble_installed__ = true
+</script>
+
+    <script type="module" src="/@vite/client"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx?v=kkCuOy9O_iJdyxXoK1UGl"></script>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+  </body>
+</html>
+mutationFn @ PhotoGallery.tsx:62
