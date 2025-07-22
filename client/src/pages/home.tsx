@@ -38,7 +38,7 @@ export default function Home() {
   });
 
   const handleLogout = () => {
-    window.location.href = "/api/logout";
+    window.location.href = "/api/auth/google/logout";
   };
 
   if (isLoading || !isAuthenticated) {
@@ -100,8 +100,13 @@ export default function Home() {
                 <span className="font-medium text-gray-900">
                   {user?.firstName || user?.email}
                 </span>
-                <Button variant="ghost" size="icon" onClick={handleLogout}>
-                  <i className="fas fa-sign-out-alt"></i>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleLogout}
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  Logout
                 </Button>
               </div>
             </div>

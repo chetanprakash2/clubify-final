@@ -138,6 +138,14 @@ export default function ExploreClubs() {
               <span className="font-medium text-gray-900">
                 {user?.firstName || user?.email}
               </span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => window.location.href = "/api/auth/google/logout"}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Logout
+              </Button>
             </div>
           </div>
         </div>

@@ -131,3 +131,13 @@ The application is completely platform-independent with zero vendor lock-in. It 
 - Added login/logout functions to useAuth hook for frontend integration
 - Application now uses Google OAuth2 with MongoDB sessions for scalable authentication
 - Removed all Replit dependencies from authentication system
+
+### July 22, 2025 - Enhanced Club Management Features
+- **Club display pictures**: Added URL input field for club logos/images in settings modal
+- **Visibility controls**: Implemented public/private toggle to control explore page appearance
+- **Invite link system**: Created unique invite code generation with copy-to-clipboard functionality
+- **Public club discovery**: Built explore page with search functionality for finding public clubs
+- **Join via invite**: Added seamless join functionality using invite links for private clubs
+- **Improved UI/UX**: Enhanced club settings modal with scroll support and better organization
+- **Logout functionality**: Added consistent logout buttons across all main pages (home, explore, club dashboard)
+- **Database enhancements**: Extended club schema with displayPictureUrl, isPublic, and inviteCode fields

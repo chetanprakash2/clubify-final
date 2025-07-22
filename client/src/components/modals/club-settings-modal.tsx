@@ -232,7 +232,7 @@ export function ClubSettingsModal({ club }: ClubSettingsModalProps) {
           Settings
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Club Settings</DialogTitle>
         </DialogHeader>
