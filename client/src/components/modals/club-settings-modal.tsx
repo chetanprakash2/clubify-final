@@ -45,7 +45,7 @@ import { Settings, Trash2, LogOut, Upload, Copy, Share, Eye, EyeOff, Link } from
 const clubSettingsSchema = z.object({
   name: z.string().min(1, "Club name is required"),
   description: z.string().optional(),
-  displayPictureUrl: z.string().url("Please enter a valid image URL").optional().or(z.literal("")),
+  displayPictureUrl: z.string().optional(),
   isPublic: z.boolean().optional(),
 });
 
@@ -59,6 +59,7 @@ export function ClubSettingsModal({ club }: ClubSettingsModalProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const [inviteCode, setInviteCode] = useState(club.inviteCode || "");
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(club.displayPictureUrl || "");
 
   const { data: members = [] } = useQuery({
     queryKey: ["/api/clubs", club._id, "members"],
@@ -82,6 +83,28 @@ export function ClubSettingsModal({ club }: ClubSettingsModalProps) {
       isPublic: club.isPublic !== false, // Default to true if not set
     },
   });
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setUploadedImageUrl(result);
+        form.setValue("displayPictureUrl", result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const updateClubMutation = useMutation({
     mutationFn: async (data: z.infer<typeof clubSettingsSchema>) => {
@@ -270,25 +293,27 @@ export function ClubSettingsModal({ club }: ClubSettingsModalProps) {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="displayPictureUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Display Picture URL</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="https://example.com/club-image.jpg" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Enter a direct URL to an image for your club's display picture
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
+                <div>
+                  <label className="text-sm font-medium">Club Display Picture</label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="cursor-pointer mt-1"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Choose an image file from your device for the club's display picture
+                  </p>
+                  {uploadedImageUrl && (
+                    <div className="mt-2">
+                      <img 
+                        src={uploadedImageUrl} 
+                        alt="Preview" 
+                        className="w-20 h-20 rounded-lg object-cover border"
+                      />
+                    </div>
                   )}
-                />
+                </div>
                 <FormField
                   control={form.control}
                   name="isPublic"

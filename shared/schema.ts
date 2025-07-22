@@ -258,14 +258,14 @@ export const insertClubSchema = z.object({
   name: z.string().min(1, "Club name is required"),
   description: z.string().optional(),
   createdBy: z.string(),
-  displayPictureUrl: z.string().url().optional(),
+  displayPictureUrl: z.string().optional(),
   isPublic: z.boolean().optional(),
 });
 
 export const updateClubSchema = z.object({
   name: z.string().min(1, "Club name is required").optional(),
   description: z.string().optional(),
-  displayPictureUrl: z.string().url().optional(),
+  displayPictureUrl: z.string().optional(),
   isPublic: z.boolean().optional(),
 });
 

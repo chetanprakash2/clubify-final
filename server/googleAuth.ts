@@ -27,13 +27,13 @@ export function getSession() {
         ttl: sessionTtl / 1000,
         collectionName: 'user_sessions',
       });
-      console.log('✅ Using MongoDB session store');
+      console.log('MongoDB session store initialized');
     } catch (error) {
-      console.log('⚠️  MongoDB session store failed, using memory store');
+      console.log('Warning: MongoDB session store failed, using memory store');
       sessionStore = undefined;
     }
   } else {
-    console.log('⚠️  No MONGODB_URI provided - using memory session store');
+    console.log('Warning: No MONGODB_URI provided - using memory session store');
   }
   
   return session({
@@ -92,9 +92,9 @@ export async function setupAuth(app: Express) {
       }
     }));
     
-    console.log('✅ Google OAuth strategy configured');
+    console.log('Google OAuth strategy configured successfully');
   } else {
-    console.log('⚠️  Google OAuth not configured - missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET');
+    console.log('Warning: Google OAuth not configured - missing credentials');
   }
 
   // Serialize user for session
@@ -173,14 +173,34 @@ export async function setupAuth(app: Express) {
     });
   }
 
-  app.get('/api/auth/logout', (req, res) => {
-    req.logout((err) => {
+  // Logout routes
+  const handleLogout = (req: any, res: any) => {
+    req.logout((err: any) => {
       if (err) {
         console.error('Logout error:', err);
         return res.status(500).json({ message: 'Logout failed' });
       }
-      res.json({ message: 'Logged out successfully' });
+      req.session.destroy((err: any) => {
+        if (err) {
+          console.error('Session destroy error:', err);
+        }
+        res.clearCookie('connect.sid');
+        res.redirect('/');
+      });
     });
+  };
+
+  app.get('/api/logout', handleLogout);
+  app.get('/api/auth/logout', handleLogout);
+  app.get('/api/auth/google/logout', handleLogout);
+
+  // User info route
+  app.get('/api/auth/user', (req, res) => {
+    if (req.isAuthenticated()) {
+      res.json(req.user);
+    } else {
+      res.status(401).json({ message: 'Unauthorized' });
+    }
   });
 }
 
