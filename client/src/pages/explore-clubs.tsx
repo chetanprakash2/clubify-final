@@ -80,10 +80,10 @@ export default function ExploreClubs() {
   }
 
   // Get list of clubs user is already a member of
-  const userClubIds = userClubs ? userClubs.map((club: any) => club._id || club.id) : [];
+  const userClubIds = Array.isArray(userClubs) ? userClubs.map((club: any) => club._id || club.id) : [];
 
   // Filter clubs based on search query
-  const filteredClubs = publicClubs ? publicClubs.filter((club: any) => 
+  const filteredClubs = Array.isArray(publicClubs) ? publicClubs.filter((club: any) => 
     club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (club.description && club.description.toLowerCase().includes(searchQuery.toLowerCase()))
   ) : [];

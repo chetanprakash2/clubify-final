@@ -192,9 +192,17 @@ export default function Home() {
                   <Link key={club._id || club.id || index} href={`/club/${club._id || club.id}`}>
                     <div className="block border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
                       <div className="flex items-center justify-between mb-3">
-                        <div className={`w-10 h-10 bg-gradient-to-r ${getClubGradient(index)} rounded-lg flex items-center justify-center`}>
-                          <i className={`${getClubIcon(index)} text-white`}></i>
-                        </div>
+                        {club.displayPictureUrl ? (
+                          <img 
+                            src={club.displayPictureUrl} 
+                            alt={club.name}
+                            className="w-10 h-10 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className={`w-10 h-10 bg-gradient-to-r ${getClubGradient(index)} rounded-lg flex items-center justify-center`}>
+                            <i className={`${getClubIcon(index)} text-white`}></i>
+                          </div>
+                        )}
                         <Badge variant={club.membership.role === "admin" ? "secondary" : "outline"}>
                           {club.membership.role === "admin" ? "Admin" : "Member"}
                         </Badge>

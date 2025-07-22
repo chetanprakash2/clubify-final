@@ -56,72 +56,11 @@ export function useSocket(clubId?: string) {
     }
   };
 
-  const startVideoCall = (meetingId: string) => {
-    if (socketRef.current && clubId) {
-      socketRef.current.emit('start-meeting', {
-        clubId,
-        meetingId
-      });
-    }
-  };
 
-  const joinVideoCall = (meetingId: string) => {
-    if (socketRef.current && clubId) {
-      socketRef.current.emit('join-meeting', {
-        clubId,
-        meetingId
-      });
-    }
-  };
-
-  const leaveVideoCall = (meetingId: string) => {
-    if (socketRef.current) {
-      socketRef.current.emit('leave-meeting', {
-        meetingId
-      });
-    }
-  };
-
-  // WebRTC signaling methods
-  const sendWebRTCOffer = (offer: RTCSessionDescriptionInit, targetUserId?: string) => {
-    if (socketRef.current && clubId) {
-      socketRef.current.emit('webrtc-offer', {
-        clubId,
-        offer,
-        targetUserId
-      });
-    }
-  };
-
-  const sendWebRTCAnswer = (answer: RTCSessionDescriptionInit, targetUserId: string) => {
-    if (socketRef.current && clubId) {
-      socketRef.current.emit('webrtc-answer', {
-        clubId,
-        answer,
-        targetUserId
-      });
-    }
-  };
-
-  const sendICECandidate = (candidate: RTCIceCandidate, targetUserId?: string) => {
-    if (socketRef.current && clubId) {
-      socketRef.current.emit('webrtc-ice-candidate', {
-        clubId,
-        candidate: candidate.toJSON(),
-        targetUserId
-      });
-    }
-  };
 
   return {
     socket: socketRef.current,
     isConnected,
-    sendMessage,
-    startVideoCall,
-    joinVideoCall,
-    leaveVideoCall,
-    sendWebRTCOffer,
-    sendWebRTCAnswer,
-    sendICECandidate
+    sendMessage
   };
 }

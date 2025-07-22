@@ -58,6 +58,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/clubs/public', isAuthenticated, async (req: any, res) => {
+    try {
+      const clubs = await storage.getPublicClubs();
+      res.json(clubs);
+    } catch (error) {
+      console.error("Error fetching public clubs:", error);
+      res.status(500).json({ message: "Failed to fetch public clubs" });
+    }
+  });
+
   app.get('/api/clubs/:id', isAuthenticated, async (req: any, res) => {
     try {
       const clubId = req.params.id; // Use string ID for MongoDB

@@ -34,7 +34,7 @@ import { EditTaskModal } from "@/components/modals/edit-task-modal";
 import { ClubSettingsModal } from "@/components/modals/club-settings-modal";
 import { DeleteConfirmationModal } from "@/components/modals/delete-confirmation-modal";
 import { ChatComponent } from "@/components/ChatComponent";
-import { VideoMeeting } from "@/components/VideoMeeting";
+
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { ReportsSection } from "@/components/ReportsSection";
 import { queryClient } from "@/lib/queryClient";
@@ -902,7 +902,15 @@ export default function ClubDashboard() {
         return <ChatComponent clubId={clubId} members={members || []} />;
 
       case "meetings":
-        return <VideoMeeting clubId={clubId} members={members || []} />;
+        return (
+          <div className="p-6">
+            <div className="text-center py-12">
+              <Video className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Video Calls Disabled</h3>
+              <p className="text-gray-600">Video calling feature has been disabled for stability.</p>
+            </div>
+          </div>
+        );
 
       case "photos":
         return (
@@ -968,9 +976,17 @@ export default function ClubDashboard() {
                 </Button>
               </Link>
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                  <i className="fas fa-music text-white text-sm"></i>
-                </div>
+                {club?.displayPictureUrl ? (
+                  <img 
+                    src={club.displayPictureUrl} 
+                    alt="Club Logo" 
+                    className="w-8 h-8 rounded-lg object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <i className="fas fa-music text-white text-sm"></i>
+                  </div>
+                )}
                 <div>
                   <span className="text-lg font-semibold text-gray-900">{club?.name}</span>
                   <Badge variant={isAdmin ? "secondary" : "outline"} className="ml-2">

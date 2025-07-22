@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Send, Paperclip, Video, Users } from 'lucide-react';
+import { Send, Paperclip, Users } from 'lucide-react';
 
 interface ChatMessage {
   _id: string;
@@ -29,10 +29,10 @@ interface ChatComponentProps {
 
 export function ChatComponent({ clubId, members }: ChatComponentProps) {
   const { user } = useAuth();
-  const { socket, isConnected, sendMessage, startVideoCall } = useSocket(clubId);
+  const { socket, isConnected, sendMessage } = useSocket(clubId);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [isInVideoCall, setIsInVideoCall] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch initial messages
@@ -64,17 +64,13 @@ export function ChatComponent({ clubId, members }: ChatComponentProps) {
       setMessages(prev => [...prev, message]);
     };
 
-    const handleMeetingStarted = (data: { meetingId: string; startedBy: string }) => {
-      console.log('Meeting started:', data);
-      // Could show a notification or auto-join dialog
-    };
+
 
     socket.on('new-message', handleNewMessage);
-    socket.on('meeting-started', handleMeetingStarted);
 
     return () => {
       socket.off('new-message', handleNewMessage);
-      socket.off('meeting-started', handleMeetingStarted);
+
     };
   }, [socket]);
 
@@ -91,12 +87,7 @@ export function ChatComponent({ clubId, members }: ChatComponentProps) {
     setNewMessage('');
   };
 
-  const handleStartVideoCall = () => {
-    const meetingId = `meeting-${Date.now()}`;
-    startVideoCall(meetingId);
-    setIsInVideoCall(true);
-    // In a real app, you'd open a video call interface here
-  };
+
 
   const formatTime = (date: Date) => {
     return new Date(date).toLocaleTimeString([], { 
@@ -127,15 +118,9 @@ export function ChatComponent({ clubId, members }: ChatComponentProps) {
               </span>
             </div>
             <div className="flex items-center space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleStartVideoCall}
-                disabled={!isConnected}
-              >
-                <Video className="w-4 h-4 mr-2" />
-                Start Video Call
-              </Button>
+              <span className="text-sm text-gray-500">
+                {isConnected ? 'Connected' : 'Connecting...'}
+              </span>
             </div>
           </div>
         </div>

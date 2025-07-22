@@ -124,6 +124,8 @@ export function ClubSettingsModal({ club }: ClubSettingsModalProps) {
       toast({ title: "Success", description: "Club updated successfully" });
       queryClient.invalidateQueries({ queryKey: ["/api/clubs", club._id] });
       queryClient.invalidateQueries({ queryKey: ["/api/clubs/my"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/clubs/public"] });
+      setUploadedImageUrl("");
       setOpen(false);
     },
     onError: (error: Error) => {
