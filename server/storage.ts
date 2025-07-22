@@ -24,6 +24,7 @@ import {
   type Photo as PhotoType,
   type Report as ReportType,
   type InsertClub,
+  type UpdateClub,
   type InsertJoinRequest,
   type InsertAnnouncement,
   type InsertEvent,
@@ -41,12 +42,15 @@ export interface IStorage {
   // Club operations
   createClub(club: InsertClub): Promise<ClubType>;
   getClub(id: string): Promise<ClubType | undefined>;
-  updateClub(id: string, data: Partial<InsertClub>): Promise<ClubType>;
+  updateClub(id: string, data: UpdateClub): Promise<ClubType>;
   deleteClub(id: string): Promise<void>;
   getUserClubs(userId: string): Promise<(ClubType & { membership: ClubMembershipType })[]>;
   getClubMembers(clubId: string): Promise<(ClubMembershipType & { user: UserType })[]>;
   isClubAdmin(userId: string, clubId: string): Promise<boolean>;
   getClubAdminCount(clubId: string): Promise<number>;
+  generateInviteCode(clubId: string): Promise<string>;
+  getClubByInviteCode(inviteCode: string): Promise<ClubType | undefined>;
+  getPublicClubs(): Promise<ClubType[]>;
   
   // Membership operations
   addClubMember(userId: string, clubId: string, role: string): Promise<ClubMembershipType>;
@@ -276,7 +280,7 @@ export class DatabaseStorage implements IStorage {
     return !!membership;
   }
 
-  async updateClub(id: string, data: Partial<InsertClub>): Promise<ClubType> {
+  async updateClub(id: string, data: UpdateClub): Promise<ClubType> {
     if (this.useMemory()) {
       const club = this.memoryStore.clubs.get(id);
       if (club) {
@@ -288,6 +292,48 @@ export class DatabaseStorage implements IStorage {
     const updatedClub = await Club.findByIdAndUpdate(id, { ...data, updatedAt: new Date() }, { new: true }).lean();
     if (!updatedClub) throw new Error('Club not found');
     return updatedClub;
+  }
+
+  async generateInviteCode(clubId: string): Promise<string> {
+    const generateCode = () => Math.random().toString(36).substring(2, 10).toUpperCase();
+    let inviteCode = generateCode();
+    let attempts = 0;
+    
+    // Ensure unique invite code
+    while (attempts < 5) {
+      const existing = await this.getClubByInviteCode(inviteCode);
+      if (!existing) break;
+      inviteCode = generateCode();
+      attempts++;
+    }
+    
+    if (this.useMemory()) {
+      const club = this.memoryStore.clubs.get(clubId);
+      if (club) {
+        club.inviteCode = inviteCode;
+        club.updatedAt = new Date();
+      }
+      return inviteCode;
+    }
+    
+    await Club.findByIdAndUpdate(clubId, { inviteCode, updatedAt: new Date() });
+    return inviteCode;
+  }
+
+  async getClubByInviteCode(inviteCode: string): Promise<ClubType | undefined> {
+    if (this.useMemory()) {
+      return Array.from(this.memoryStore.clubs.values()).find(club => club.inviteCode === inviteCode);
+    }
+    const club = await Club.findOne({ inviteCode }).lean();
+    return club || undefined;
+  }
+
+  async getPublicClubs(): Promise<ClubType[]> {
+    if (this.useMemory()) {
+      return Array.from(this.memoryStore.clubs.values()).filter(club => club.isPublic !== false);
+    }
+    const clubs = await Club.find({ isPublic: { $ne: false } }).lean();
+    return clubs;
   }
 
   async deleteClub(id: string): Promise<void> {

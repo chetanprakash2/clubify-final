@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./googleAuth";
 import {
   insertClubSchema,
+  updateClubSchema,
   insertJoinRequestSchema,
   insertAnnouncementSchema,
   insertEventSchema,
@@ -81,6 +82,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching club members:", error);
       res.status(500).json({ message: "Failed to fetch club members" });
+    }
+  });
+
+  // Club settings routes
+  app.patch('/api/clubs/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const clubId = req.params.id;
+      
+      // Check if user is admin
+      const isAdmin = await storage.isClubAdmin(userId, clubId);
+      if (!isAdmin) {
+        return res.status(403).json({ message: "Only admins can update club settings" });
+      }
+      
+      const updateData = updateClubSchema.parse(req.body);
+      const updatedClub = await storage.updateClub(clubId, updateData);
+      
+      res.json(updatedClub);
+    } catch (error) {
+      console.error("Error updating club:", error);
+      res.status(500).json({ message: "Failed to update club" });
+    }
+  });
+
+  // Generate invite code
+  app.post('/api/clubs/:id/invite-code', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const clubId = req.params.id;
+      
+      // Check if user is admin
+      const isAdmin = await storage.isClubAdmin(userId, clubId);
+      if (!isAdmin) {
+        return res.status(403).json({ message: "Only admins can generate invite codes" });
+      }
+      
+      const inviteCode = await storage.generateInviteCode(clubId);
+      res.json({ inviteCode });
+    } catch (error) {
+      console.error("Error generating invite code:", error);
+      res.status(500).json({ message: "Failed to generate invite code" });
+    }
+  });
+
+  // Join club via invite code
+  app.post('/api/clubs/join/:inviteCode', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { inviteCode } = req.params;
+      
+      // Find club by invite code
+      const club = await storage.getClubByInviteCode(inviteCode);
+      if (!club) {
+        return res.status(404).json({ message: "Invalid invite code" });
+      }
+      
+      // Check if user is already a member
+      const existingMembership = await storage.getClubMembership(userId, club._id);
+      if (existingMembership) {
+        return res.status(400).json({ message: "You are already a member of this club" });
+      }
+      
+      // Add user as member
+      await storage.addClubMember(userId, club._id, "member");
+      
+      res.json({ message: "Successfully joined club", club });
+    } catch (error) {
+      console.error("Error joining club via invite:", error);
+      res.status(500).json({ message: "Failed to join club" });
+    }
+  });
+
+  // Get public clubs for explore page
+  app.get('/api/clubs/public', isAuthenticated, async (req: any, res) => {
+    try {
+      const clubs = await storage.getPublicClubs();
+      res.json(clubs);
+    } catch (error) {
+      console.error("Error fetching public clubs:", error);
+      res.status(500).json({ message: "Failed to fetch public clubs" });
     }
   });
 

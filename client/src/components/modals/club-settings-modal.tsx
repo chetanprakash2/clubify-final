@@ -29,19 +29,24 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { Settings, Trash2, LogOut } from "lucide-react";
+import { Settings, Trash2, LogOut, Upload, Copy, Share, Eye, EyeOff, Link } from "lucide-react";
 
 const clubSettingsSchema = z.object({
   name: z.string().min(1, "Club name is required"),
   description: z.string().optional(),
+  displayPictureUrl: z.string().url("Please enter a valid image URL").optional().or(z.literal("")),
+  isPublic: z.boolean().optional(),
 });
 
 interface ClubSettingsModalProps {
@@ -53,6 +58,7 @@ export function ClubSettingsModal({ club }: ClubSettingsModalProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
+  const [inviteCode, setInviteCode] = useState(club.inviteCode || "");
 
   const { data: members = [] } = useQuery({
     queryKey: ["/api/clubs", club._id, "members"],
@@ -72,6 +78,8 @@ export function ClubSettingsModal({ club }: ClubSettingsModalProps) {
     defaultValues: {
       name: club.name,
       description: club.description || "",
+      displayPictureUrl: club.displayPictureUrl || "",
+      isPublic: club.isPublic !== false, // Default to true if not set
     },
   });
 
@@ -156,6 +164,32 @@ export function ClubSettingsModal({ club }: ClubSettingsModalProps) {
     },
   });
 
+  const generateInviteCodeMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/clubs/${club._id}/invite-code`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to generate invite code");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setInviteCode(data.inviteCode);
+      toast({ title: "Success", description: "Invite code generated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/clubs", club._id] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: z.infer<typeof clubSettingsSchema>) => {
     updateClubMutation.mutate(data);
   };
@@ -166,6 +200,24 @@ export function ClubSettingsModal({ club }: ClubSettingsModalProps) {
 
   const handleLeaveClub = () => {
     leaveClubMutation.mutate();
+  };
+
+  const handleGenerateInviteCode = () => {
+    generateInviteCodeMutation.mutate();
+  };
+
+  const copyInviteLink = async () => {
+    const inviteLink = `${window.location.origin}/join/${inviteCode}`;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      toast({ title: "Success", description: "Invite link copied to clipboard" });
+    } catch (error) {
+      toast({
+        title: "Error", 
+        description: "Failed to copy invite link",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!isAdmin && !currentMember) {
@@ -218,6 +270,60 @@ export function ClubSettingsModal({ club }: ClubSettingsModalProps) {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="displayPictureUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Display Picture URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://example.com/club-image.jpg" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter a direct URL to an image for your club's display picture
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="isPublic"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">
+                          {field.value ? (
+                            <div className="flex items-center gap-2">
+                              <Eye className="h-4 w-4" />
+                              Public Club
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <EyeOff className="h-4 w-4" />
+                              Private Club
+                            </div>
+                          )}
+                        </FormLabel>
+                        <FormDescription>
+                          {field.value 
+                            ? "Club is visible on the explore page for anyone to find and join" 
+                            : "Club is private and requires an invite link to join"
+                          }
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
                 <div className="flex justify-end">
                   <Button type="submit" disabled={updateClubMutation.isPending}>
                     {updateClubMutation.isPending ? "Updating..." : "Update Club"}
@@ -225,6 +331,60 @@ export function ClubSettingsModal({ club }: ClubSettingsModalProps) {
                 </div>
               </form>
             </Form>
+
+            <Separator />
+
+            {/* Invite Code Section */}
+            <div className="space-y-4">
+              <h4 className="font-medium flex items-center gap-2">
+                <Share className="h-4 w-4" />
+                Invite Link
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                Share this link to let people join your club instantly
+              </p>
+              
+              {inviteCode ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Input 
+                      value={`${window.location.origin}/join/${inviteCode}`}
+                      readOnly 
+                      className="font-mono text-sm"
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={copyInviteLink}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">Code: {inviteCode}</Badge>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleGenerateInviteCode}
+                      disabled={generateInviteCodeMutation.isPending}
+                    >
+                      <Link className="h-4 w-4 mr-1" />
+                      {generateInviteCodeMutation.isPending ? "Generating..." : "New Code"}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  onClick={handleGenerateInviteCode}
+                  disabled={generateInviteCodeMutation.isPending}
+                  className="w-full"
+                >
+                  <Link className="h-4 w-4 mr-2" />
+                  {generateInviteCodeMutation.isPending ? "Generating..." : "Generate Invite Link"}
+                </Button>
+              )}
+            </div>
 
             <Separator />
 

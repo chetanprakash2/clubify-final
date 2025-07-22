@@ -8,6 +8,8 @@ import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import ClubDashboard from "@/pages/club-dashboard";
+import JoinClub from "@/pages/join-club";
+import ExploreClubs from "@/pages/explore-clubs";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -15,11 +17,16 @@ function Router() {
   return (
     <Switch>
       {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
+        <>
+          <Route path="/" component={Landing} />
+          <Route path="/join/:inviteCode" component={JoinClub} />
+        </>
       ) : (
         <>
           <Route path="/" component={Home} />
+          <Route path="/explore" component={ExploreClubs} />
           <Route path="/club/:id" component={ClubDashboard} />
+          <Route path="/join/:inviteCode" component={JoinClub} />
         </>
       )}
       <Route component={NotFound} />

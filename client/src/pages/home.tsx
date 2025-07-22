@@ -148,9 +148,11 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600 mb-4">Discover and request to join clubs that match your interests.</p>
-              <Button className="w-full bg-secondary hover:bg-green-600">
-                Browse Clubs
-              </Button>
+              <Link href="/explore">
+                <Button className="w-full bg-secondary hover:bg-green-600">
+                  Browse Clubs
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>

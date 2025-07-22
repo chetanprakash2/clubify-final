@@ -22,6 +22,9 @@ export interface IClub extends BaseDocument {
   name: string;
   description?: string;
   createdBy: string; // User ID
+  displayPictureUrl?: string;
+  isPublic: boolean; // Whether club is visible in explore page
+  inviteCode?: string; // Unique code for private club invites
 }
 
 // Club Membership interfaces
@@ -130,6 +133,9 @@ export const clubSchema = new Schema<IClub>({
   name: { type: String, required: true },
   description: String,
   createdBy: { type: String, required: true, ref: 'User' },
+  displayPictureUrl: String,
+  isPublic: { type: Boolean, default: true },
+  inviteCode: { type: String, unique: true, sparse: true },
 }, {
   timestamps: true,
   collection: 'clubs'
@@ -252,6 +258,15 @@ export const insertClubSchema = z.object({
   name: z.string().min(1, "Club name is required"),
   description: z.string().optional(),
   createdBy: z.string(),
+  displayPictureUrl: z.string().url().optional(),
+  isPublic: z.boolean().optional(),
+});
+
+export const updateClubSchema = z.object({
+  name: z.string().min(1, "Club name is required").optional(),
+  description: z.string().optional(),
+  displayPictureUrl: z.string().url().optional(),
+  isPublic: z.boolean().optional(),
 });
 
 export const insertJoinRequestSchema = z.object({
@@ -341,6 +356,7 @@ export type Photo = IPhoto;
 export type Report = IReport;
 
 export type InsertClub = z.infer<typeof insertClubSchema>;
+export type UpdateClub = z.infer<typeof updateClubSchema>;
 export type InsertJoinRequest = z.infer<typeof insertJoinRequestSchema>;
 export type InsertAnnouncement = z.infer<typeof insertAnnouncementSchema>;
 export type InsertEvent = z.infer<typeof insertEventSchema>;
